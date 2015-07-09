@@ -1,1 +1,20 @@
-expression ::=
+integer_literal ::= [0-9]
+
+identifier ::= [a-zA-Z_]
+
+expression ::= integer_literal | binary_expression | identifier
+
+binary_expression ::= expression operator expression
+
+operator ::= '=' | '+' | '-'
+statement ::= expression | while_loop | if_statment
+statement_list ::= statement statement_list | statement
+expression_list ::= expression expression_list | expression
+
+if_statement ::= 'if' '(' expression ')' '{' statement_list '}'
+
+while_loop ::= 'while' '(' expression ')' '{' statement_list '}'
+
+function_call ::= identifier '(' expression_list ')'
+
+function_definition ::= 'function' identifier '(' expression_list ')' '{' statement_list '}'
