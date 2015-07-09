@@ -1,0 +1,21 @@
+digit = anything:x ?(x in '0123456789') -> int(x)
+number = <digit+>:ds -> int(ds)
+
+# white space like tabs, newlines, or spaces
+ws = ' '* | '\t'* | '\n'*
+
+identifier =  anything:x ?(x in 'abcdefghijklmnopqrstuvwxyz') -> x
+
+expression = number:left ws ( '+' ws number:right -> left + right
+                            | '-' ws number:right-> left - right
+                            | -> left)
+
+statement = expression | while_loop | if_statement
+
+if_statement = 'if' ws '(' ws expression:e ws ')' ws '{' ws statement*:s ws '}' -> if_func(e, s)
+
+while_loop = 'while' '(' expression ')' '{' statement* '}'
+
+function_call = identifier '(' expression* ')'
+
+function_definition = 'function' identifier '(' expression* ')' '{' statement* '}'
