@@ -3,6 +3,7 @@ import parsley
 with open('cinch.parsley', 'r') as f:
     grammar = f.read()
 
+
 def if_func(e, s):
     if e:
         for stmt in s:
