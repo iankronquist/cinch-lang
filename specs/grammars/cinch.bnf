@@ -10,11 +10,11 @@ binary_expression ::= integer_literal operator expression
 
 operator ::= '=' | '+' | '-'
 statement ::= expression | while_loop | if_statment | function_definition
-statement_list ::= statement statement_list | statement
-expression_list ::= expression expression_list | expression
-identifier_list ::= identifier | identifier identifier_list
+statement_list ::= statement statement_list | statement | epsilon
+expression_list ::= expression expression_list | expression | epsilon
+identifier_list ::= identifier | identifier identifier_list | epsilon
 argument ::= identifier | integer_literal
-argument_list ::= argument | argument argument_list
+argument_list ::= argument | argument argument_list | epsilon
 
 if_statement ::= 'if' '(' expression ')' '{' statement_list '}'
 
