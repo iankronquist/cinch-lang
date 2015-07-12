@@ -1,12 +1,13 @@
 import unittest
-from mock import Mock, patch
+from mock import patch
 # Normally I don't like to do this but we're going to be testing just about
 # everything in this file
-from parser import *
+from cinch.parser import *  # noqa
+
 
 class TestTreeNode(unittest.TestCase):
+
     def test_init(self):
-        from parser import *
         node1 = TreeNode()
         self.assertEqual(node1.value, None)
         self.assertEqual(node1.children, [])
@@ -18,8 +19,10 @@ class TestTreeNode(unittest.TestCase):
         c1 = TreeNode('c1')
         c2 = TreeNode('c2')
         root = TreeNode('root', [c1, c2])
+
         def visitor(node):
             node.value = 'test'
+
         root.visit(visitor)
         assert_visitor = lambda node: self.assertEqual(node.value, 'test')
         root.visit(assert_visitor)
@@ -39,6 +42,7 @@ class TestTreeNode(unittest.TestCase):
         c2 = TreeNode('c2')
         root = TreeNode('root', [c1, c2])
         self.assertEqual([root, c1, c2], list(root))
+
 
 class TestParsing(unittest.TestCase):
     @patch('__builtin__.exit')
@@ -123,9 +127,9 @@ class TestParsing(unittest.TestCase):
 
     @patch('__builtin__.exit')
     def test_parse_function_def(self, mock_exit):
-        tokens = ['function', 'somefunction', '(', 'a', ')', '{',
-            'a', '+', '1',
-            'somefunction', '(', 'a', ')',
+        tokens = ['function', 'somefunction', '(', 'a', ')', '{',    # noqa
+            'a', '+', '1',                                           # noqa
+            'somefunction', '(', 'a', ')',                           # noqa
         '}']
         ast = parse_function_def(tokens)
         self.assertIsInstance(ast, FunctionDef)
@@ -137,9 +141,9 @@ class TestParsing(unittest.TestCase):
         self.assertFalse(mock_exit.called)
 
         # unbalanced parens
-        tokens = ['function', 'somefunction', ')', 'a', ')', '{',
-            'a', '+', '1',
-            'somefunction', '(', 'a', ')',
+        tokens = ['function', 'somefunction', ')', 'a', ')', '{',    # noqa
+            'a', '+', '1',                                           # noqa
+            'somefunction', '(', 'a', ')',                           # noqa
         '}']
         ast = parse_function_def(tokens)
         self.assertTrue(mock_exit.called)
