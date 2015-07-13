@@ -1,5 +1,6 @@
 Cinch
 =====
+[![Build Status](https://travis-ci.org/iankronquist/cinch-lang.svg)](https://travis-ci.org/iankronquist/cinch-lang)
 
 A stupid-simple language.
 
