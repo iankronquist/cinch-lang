@@ -25,3 +25,5 @@ while_loop ::= 'while' '(' expression ')' '{' statement_list '}'
 function_call ::= identifier '(' expression_list ')'
 
 function_definition ::= 'function' identifier '(' identifier_list ')' '{' statement_list '}'
+
+return_statement ::= 'return' expression
