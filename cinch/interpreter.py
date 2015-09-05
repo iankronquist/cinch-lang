@@ -27,7 +27,7 @@ def interpret_statement_list(ast, variable_table):
 def is_truthy(node, variable_table):
     assert isinstance(node, (Identifier, IntegerLiteral))
     if isinstance(node, Identifier):
-        val = variable_table.get[node.value]
+        val = variable_table[node.value]
         if val == 0:
             return False
         else:
@@ -49,10 +49,10 @@ def interpret_while(statement, variable_table):
 
 
 def get_value(node, variable_table):
-    if isinstance(node[1], IntegerLiteral):
-        value = node[1].value
+    if isinstance(node, IntegerLiteral):
+        value = node.value
     else:
-        value = variable_table.get[node[1]]
+        value = variable_table[node.value]
     return value
 
 
@@ -96,4 +96,4 @@ def interpret_binary_expr(parent, statement, variable_table):
 def insert_in_tree(parent, old, new):
     index = parent.index(old)
     parent.pop(index)
-    parent.insert(new)
+    parent.insert(index, new)
