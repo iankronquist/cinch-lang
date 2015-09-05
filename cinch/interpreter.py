@@ -59,8 +59,20 @@ def get_value(node, variable_table):
 def interpret_func_call(node, variable_table):
     function = variable_table[node.value]
     local = variable_table.copy()
-    local.update(zip(function[0], node[0]))
-    interpret_statement_list(statement[1], local)
+    local.update(zip(function[0], resolve_values(node[0], variable_table)))
+    interpret_statement_list(node[1], local)
+
+
+def resolve_values(expression_list, variable_table):
+    resolved = []
+    for expr in expression_list:
+        if isinstance(expr, FunctionCall):
+            ret = interpret_func_call(expr)
+            resolved.push(ret)
+        else:
+            resolved.push(get_value(expr, variable_table))
+    return resolved
+
 
 def interpret_binary_expr(parent, statement, variable_table):
     if statement.value == '=':
