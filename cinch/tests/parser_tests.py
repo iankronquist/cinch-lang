@@ -176,3 +176,29 @@ class TestParsing(unittest.TestCase):
         self.assertEqual(minus.children[0].value, 'a')
         self.assertEqual(minus.children[1].value, 'b')
         self.assertFalse(mock_exit.called)
+
+    # Tests for a bug where function definitions were incorrectly parsed as a
+    # single identifier named 'function' and then a function call.
+    def test_function_def_regression(self):
+        tokens = [
+        'a', '=', '1', '+', '1',                           # noqa
+        'function', 'somefunction', '(', 'a', ')', '{',    # noqa
+            'a', '+', '1',                                 # noqa
+            'var', '=', 'somefunction', '(', 'a', ')',     # noqa
+            'return', 'var',                               # noqa
+        '}',                                               # noqa
+        'b', '=', '12', '-', '1',                          # noqa
+        ]
+        ast = parse(tokens)
+        self.assertIsInstance(ast, StatementList)
+        self.assertIsInstance(ast.children[0], Operator)
+        self.assertIsInstance(ast.children[1], FunctionDef)
+        self.assertIsInstance(ast.children[2], Operator)
+        self.assertEqual(ast.children[1].value, 'somefunction')
+        print ast.children[1].children[1].children
+        self.assertEqual(len(ast.children[1].children[1].children), 3)
+        self.assertIsInstance(ast.children[1].children[1].children[2], Return)
+        self.assertIsInstance(
+            ast.children[1].children[1].children[2].children[0], Identifier)
+        self.assertEqual(
+            ast.children[1].children[1].children[2].children[0].value, 'var')
