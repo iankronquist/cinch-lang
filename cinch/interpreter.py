@@ -8,12 +8,13 @@ def interpret(ast):
     variable_table = {}
     interpret_statement_list(ast, variable_table)
 
+
 def interpret_statement_list(ast, variable_table):
     for statement in ast:
         if isinstance(statement, BinaryExpression):
             interpret_binary_expr(statement, variable_table)
         elif isinstance(statement, If):
-            if is_truthy(statement[0]):
+            if is_truthy(statement[0], variable_table):
                 interpret_statement_list(statement[1], variable_table)
         elif isinstance(statement, While):
             interpret_while(statement, variable_table)
@@ -22,16 +23,12 @@ def interpret_statement_list(ast, variable_table):
         elif isinstance(statement, FunctionDef):
             interpret_func_def(statement, variable_table)
 
-def is_truthy(node):
+
+def is_truthy(node, variable_table):
     assert isinstance(node, (Identifier, IntegerLiteral))
     if isinstance(node, Identifier):
-        val = variable_table.get(node.value, None)
-        # This isn't idiomatic python because it's meant to be obvious to
-        # those not familiar with the language
-        if val is None:
-            print('{0} is undefined!'.format(node.value))
-            sys.exit(1)
-        elif val == 0:
+        val = variable_table.get[node.value]
+        if val == 0:
             return False
         else:
             return True
