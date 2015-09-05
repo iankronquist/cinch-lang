@@ -2,8 +2,10 @@ import sys
 from lexer import lex
 from parser import parse
 
+
 USAGE = """{name} file
     Parses and prints the ast to stdout."""
+
 
 def main():
     file_name = sys.argv[1]
@@ -11,8 +13,7 @@ def main():
         source = f.read()
     tokens = lex(source)
     ast = parse(tokens)
-    print ast
-
+    print(ast)
 
 
 if __name__ == '__main__':
