@@ -12,4 +12,5 @@ def lex(source):
     # Strip comments from source code.
     source = re.sub('#.*$', '', source)
     return filter(lambda s: s != '',
-                  map(lambda x: x.strip(), source.split(' ')))
+                  map(lambda x: x.strip(),
+                    map(lambda line: line.split(' '), source.split('\n'))))
