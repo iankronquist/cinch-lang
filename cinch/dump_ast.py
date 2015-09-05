@@ -18,6 +18,6 @@ def main():
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        print USAGE
+        print USAGE.format(name=sys.argv[0])
     else:
         main()
