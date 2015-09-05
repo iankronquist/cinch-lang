@@ -100,6 +100,10 @@ class FunctionDef(Statement):
     pass
 
 
+class Return(Statement):
+    pass
+
+
 class Identifier(Expression):
     pass
 

@@ -3,7 +3,7 @@ import sys
 from cinch_types import (Operator, If, While, IntegerLiteral, FunctionCall,
                          FunctionDef, Identifier, IdentifierList,
                          StatementList, ExpressionList, ArgumentList,
-                         Operators)
+                         Operators, Return)
 
 
 # Now this is where things get complicated. The parser takes in an array of
@@ -36,6 +36,10 @@ def parse_statement(tokens):
         return parse_if_statement(tokens)
     elif tokens[0] == 'while':
         return parse_while_loop(tokens)
+    elif tokens[0] == 'function':
+        return parse_function_def(tokens)
+    elif tokens[0] == 'return':
+        return parse_return_statement(tokens)
     else:
         return parse_single_expression(tokens)
 
@@ -97,6 +101,12 @@ def parse_identifier_list(tokens):
 def parse_operator(tokens):
     op = tokens.pop(0)
     return Operator(op)
+
+
+def parse_return_statement(tokens):
+    eat('return', tokens)
+    expr = parse_single_expression(tokens)
+    return Return(None, children=[expr])
 
 
 # function_call ::= identifier '(' argument_list ')'
