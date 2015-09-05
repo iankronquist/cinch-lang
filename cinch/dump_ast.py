@@ -1,3 +1,4 @@
+#!/usr/bin/python2
 import sys
 from lexer import lex
 from parser import parse
