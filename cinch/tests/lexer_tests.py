@@ -25,6 +25,7 @@ class TestLexer(TestCase):
             function afunction ( a b c ) {
                 avariable = 1 + 1
                 anothervariable = a - 314
+                return anothervariable
             }
         """
 
@@ -33,6 +34,7 @@ class TestLexer(TestCase):
         '{',                                                          # noqa
             'avariable', '=', '1', '+', '1',                          # noqa
             'anothervariable', '=', 'a', '-', '314',                  # noqa
+            'return', 'anothervariable',
         '}']
         result = lex(source)
         self.assertEqual(result, expected_lexing)
