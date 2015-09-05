@@ -3,6 +3,7 @@ from mock import patch
 # Normally I don't like to do this but we're going to be testing just about
 # everything in this file
 from cinch.parser import *  # noqa
+from cinch.cinch_types import *  # noqa
 
 
 class TestTreeNode(unittest.TestCase):
