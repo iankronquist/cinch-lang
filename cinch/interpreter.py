@@ -1,7 +1,6 @@
 from cinch_types import (Operator, If, While, IntegerLiteral, FunctionCall,
-                         FunctionDef, Identifier, IdentifierList,
-                         StatementList, ExpressionList, ArgumentList,
-                         Operators, BinaryExpression)
+                         FunctionDef, Identifier, StatementList,
+                         BinaryExpression)
 
 
 def interpret(ast):
@@ -42,19 +41,23 @@ def is_truthy(node):
         else:
             return True
 
+
 def interpret_func_def(statement, variable_table):
     variable_table[statement[0]] = statement[1]
 
+
 def interpret_while(statement, variable_table):
-    while is_truthy(statement[0]):
+    while is_truthy(statement[0], variable_table):
         interpret_statement_list(statement[1])
 
+
 def get_value(node, variable_table):
-    if isinstance(statement[1], IntegerLiteral):
-        value = statement[1].value
+    if isinstance(node[1], IntegerLiteral):
+        value = node[1].value
     else:
-        value = variable_table.get[statement[1]]
+        value = variable_table.get[node[1]]
     return value
+
 
 def interpret_func_call(node, variable_table):
     function = variable_table[node.value]
@@ -79,6 +82,7 @@ def interpret_binary_expr(parent, statement, variable_table):
         rvalue = get_value(statement[1], variable_table)
         result = IntegerLiteral(lvalue+rvalue)
         insert_in_tree(parent, statement, result)
+
 
 def insert_in_tree(parent, old, new):
     index = parent.index(old)
