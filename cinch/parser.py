@@ -26,8 +26,10 @@ def parse(tokens):
 
 # statement ::= expression | while_loop | if_statment
 def parse_statement(tokens):
-    # Gobble empty tokens
-    if tokens[0] == '':
+    if len(tokens) == 0:
+        return None
+    elif tokens[0] == '':
+        # Gobble empty tokens
         tokens.pop(0)
         return parse_statement(tokens)
     elif tokens[0] == 'if':
