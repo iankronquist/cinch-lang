@@ -1,7 +1,7 @@
 from itertools import chain, imap
 
 
-Operators = ['+', '-', '=']
+Operators = ['+', '-', '=', '>']
 
 
 # First let's define the tree structure.
@@ -30,6 +30,15 @@ class TreeNode (object):
         for child in chain(*imap(lambda x: x.pre_order(), self.children)):
             yield child
 
+    def index(self, item):
+        return self.children.index(item)
+
+    def insert(self, index, item):
+        return self.children.insert(index, item)
+
+    def pop(self, index=-1):
+        return self.children.pop(index)
+
 
 class ListMixIn(object):
 
@@ -42,15 +51,6 @@ class ListMixIn(object):
 
     def __setitem__(self, index, value):
         self.children.insert(index, value)
-
-    def index(self, item):
-        return self.children.index(item)
-
-    def insert(self, index, item):
-        return self.children.insert(index, item)
-
-    def pop(self, index=-1):
-        return self.children.pop(index)
 
     def __getitem__(self, index):
         self.children[index]
