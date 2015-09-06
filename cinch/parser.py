@@ -2,8 +2,7 @@ import sys
 
 from cinch_types import (Operator, If, While, IntegerLiteral, FunctionCall,
                          FunctionDef, Identifier, IdentifierList,
-                         StatementList, ExpressionList, ArgumentList,
-                         Operators, Return)
+                         StatementList, ExpressionList, Operators, Return)
 
 
 # Now this is where things get complicated. The parser takes in an array of
@@ -245,13 +244,7 @@ def parse_argument_list(tokens):
                     | epsilon
     ```
     """
-    arg_list = ArgumentList()
-    while True:
-        arg = parse_single_argument(tokens)
-        if arg is None:
-            break
-        arg_list.append(arg)
-    return arg_list
+    return parse_expression_list(tokens)
 
 
 def parse_binary_expression(lhs, tokens):
