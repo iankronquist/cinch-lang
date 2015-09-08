@@ -1,7 +1,7 @@
 from itertools import chain, imap
 
 
-Operators = ['+', '-', '=', '>']
+Operators = ['+', '-', '=', '<']
 
 
 # First let's define the tree structure.
