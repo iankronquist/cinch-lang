@@ -1,0 +1,7 @@
+function fib ( a b max ) {
+	if ( b < max ) {
+		return fib ( b b + a )
+	}
+	return b
+}
+fib ( 1 1 10 )
