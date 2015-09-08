@@ -2,23 +2,34 @@
 import sys
 from lexer import lex
 from parser import parse
+from interpreter import interpret
 
 
-USAGE = """{name} file
-    Parses and prints the ast to stdout."""
+USAGE = """{name} [interpret|dump|vm|compile] file"""
 
 
 def main():
-    file_name = sys.argv[1]
+    flag = sys.argv[1]
+    file_name = sys.argv[2]
     with open(file_name, 'r') as f:
         source = f.read()
     tokens = lex(source)
     ast = parse(tokens)
-    print(ast)
+
+    if flag == 'interpret':
+        interpret(ast)
+    elif flag == 'dump':
+        print(ast)
+    elif flag == 'vm':
+        raise NotImplementedError
+    elif flag == 'compile':
+        raise NotImplementedError
+    else:
+        print USAGE.format(name=sys.argv[0])
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
+    if len(sys.argv) != 3:
         print USAGE.format(name=sys.argv[0])
     else:
         main()
