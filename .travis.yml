@@ -5,5 +5,4 @@ install:
   - "pip install -r requirements.txt"
 script:
   - "nosetests cinch/tests"
-before_script:
   - "flake8 ."
