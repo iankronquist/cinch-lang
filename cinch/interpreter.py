@@ -57,7 +57,7 @@ def interpret_identifier(parent, statement, variable_table):
 
 def interpret_return_statement(parent, statement, variable_table):
     interpret_expression(statement, statement.children[0],
-                                  variable_table)
+                         variable_table)
     insert_in_tree(parent, statement, statement.children[0])
 
 
