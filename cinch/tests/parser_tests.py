@@ -115,8 +115,7 @@ class TestParsing(unittest.TestCase):
         ast = parse_function_call(tokens)
         self.assertIsInstance(ast, FunctionCall)
         self.assertEqual(ast.value, 'somefunction')
-        print ast.children
-        self.assertIsInstance(ast.children[0], ArgumentList)
+        self.assertIsInstance(ast.children[0], ExpressionList)
         self.assertEqual(len(ast.children), 1)
         self.assertEqual(len(tokens), 0)
         self.assertFalse(mock_exit.called)
@@ -135,7 +134,7 @@ class TestParsing(unittest.TestCase):
         ast = parse_function_def(tokens)
         self.assertIsInstance(ast, FunctionDef)
         self.assertEqual(ast.value, 'somefunction')
-        self.assertIsInstance(ast.children[0], ArgumentList)
+        self.assertIsInstance(ast.children[0], ExpressionList)
         self.assertIsInstance(ast.children[1], StatementList)
         self.assertEqual(len(ast.children), 2)
         self.assertEqual(len(tokens), 0)
