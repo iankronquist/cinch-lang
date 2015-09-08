@@ -12,13 +12,11 @@ def interpret(ast):
 
 def interpret_statement_list(parent, ast, variable_table):
     for statement in ast.children:
-        print 'a'
         interpret_statement(parent, statement, variable_table)
 
 
 def interpret_statement(parent, ast, variable_table):
     if isinstance(ast, If):
-        print ast, ast.children, variable_table
         interpret_expression(ast, ast.children[0], variable_table)
         if is_truthy(ast.children[0], variable_table):
             interpret_statement_list(ast.children[1], ast.children[1],
