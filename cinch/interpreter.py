@@ -79,8 +79,10 @@ def interpret_func_def(statement, variable_table):
 
 
 def interpret_while(parent, statement, variable_table):
+    interpret_expression(statement, statement.children[0], variable_table)
     while is_truthy(statement.children[0], variable_table):
         interpret_statement_list(parent, statement.children[1], {})
+        interpret_expression(statement, statement.children[0], variable_table)
 
 
 def get_value(node, variable_table):
