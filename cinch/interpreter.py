@@ -116,7 +116,6 @@ def resolve_values(expression_list, variable_table):
 
 def interpret_binary_expr(parent, statement, variable_table):
     # TODO: Implement <, <=, >, >=, !=
-    lvalue = get_value(statement.children[0], variable_table).value
     rvalue = get_value(statement.children[1], variable_table).value
     if statement.value == '=':
         assert isinstance(statement.children[0], Identifier)
@@ -124,12 +123,15 @@ def interpret_binary_expr(parent, statement, variable_table):
                           (Identifier, IntegerLiteral, Operator))
         variable_table[lvalue] = rvalue
     elif statement.value == '-':
+        lvalue = get_value(statement.children[0], variable_table).value
         result = IntegerLiteral(lvalue-rvalue)
         insert_in_tree(statement, result)
     elif statement.value == '+':
+        lvalue = get_value(statement.children[0], variable_table).value
         result = IntegerLiteral(lvalue+rvalue)
         insert_in_tree(parent, statement, result)
     elif statement.value == '<':
+        lvalue = get_value(statement.children[0], variable_table).value
         if lvalue < rvalue:
             result = IntegerLiteral(1)
         else:
