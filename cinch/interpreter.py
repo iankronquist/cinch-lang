@@ -103,7 +103,8 @@ def interpret_func_call(node, variable_table):
     local = deepcopy(variable_table)
     # FIXME: This is way too complicated
     resolve_values(arguments, local)
-    for child, argument in zip(parent.children[0].children, arguments.children):
+    for child, argument in zip(parent.children[0].children,
+                               arguments.children):
         local[child.value] = argument
     interpret_statement_list(parent.children[1], parent.children[1], local)
 
