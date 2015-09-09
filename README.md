@@ -23,7 +23,7 @@ $ ./cinch/cinch file.cinch
 
 To run tests with coverage:
 ```
-$ nosetests ./cinch/tests/ --with-coverage --cover-html-dir coverage --cover-html
+$ nosetests ./cinch/tests/ --with-coverage --cover-html-dir coverage --cover-html --cover-package=cinch
 ```
 
 
