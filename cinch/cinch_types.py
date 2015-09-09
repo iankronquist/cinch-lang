@@ -72,7 +72,7 @@ class Argument(TreeNode):
     pass
 
 
-class Operator(TreeNode):
+class Operator(Expression):
     pass
 
 
