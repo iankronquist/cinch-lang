@@ -122,6 +122,7 @@ def interpret_binary_expr(parent, statement, variable_table):
         assert isinstance(statement.children[0], Identifier)
         assert isinstance(statement.children[1],
                           (Identifier, IntegerLiteral, Operator))
+        lvalue = statement.children[0].value
         variable_table[lvalue] = rvalue
     elif statement.value == '-':
         lvalue = get_value(statement.children[0], variable_table).value
