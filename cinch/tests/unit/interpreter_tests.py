@@ -3,11 +3,10 @@ from mock import patch, call
 from cinch.cinch_types import (Identifier, IntegerLiteral, ArgumentList,
                                Operator, FunctionDef, StatementList, If, While,
                                Return, ExpressionList)
-from cinch.interpreter import (is_truthy, insert_in_tree, get_value,
-                               interpret_func_def, interpret_statement,
-                               interpret_while, interpret_return_statement,
-                               interpret_statement_list, interpret_identifier,
-                               resolve_values)
+from cinch.interpreter import (is_truthy, interpret_func_def,
+                               interpret_statement, interpret_while,
+                               interpret_return_statement,
+                               interpret_statement_list, interpret_identifier)
 
 
 class TestInterpreter(TestCase):
@@ -36,29 +35,6 @@ class TestInterpreter(TestCase):
 
         c = Identifier('c')
         self.assertEqual(is_truthy(c, scope), True)
-
-    def test_insert_in_tree(self):
-        args = ArgumentList()
-        arg0 = Identifier('a')
-        arg1 = Operator('+')
-        arg2 = IntegerLiteral(1)
-        left = IntegerLiteral(1)
-        right = IntegerLiteral(1)
-        arg1.children = [left, right]
-        args.children = [arg0, arg1, arg2]
-
-        result = IntegerLiteral(2)
-        insert_in_tree(args, arg1, result)
-        self.assertEqual([arg0, result, arg2], args.children)
-
-    def test_get_value(self):
-        one = IntegerLiteral(1)
-        a = Identifier('a')
-        scope = {
-            'a': 2,
-        }
-        self.assertEqual(get_value(a, scope), 2)
-        self.assertEqual(get_value(one, scope), 1)
 
     def test_def_func(self):
         func = FunctionDef('name')
@@ -172,14 +148,3 @@ class TestInterpreter(TestCase):
         interpret_identifier(parent, ident, scope)
         self.assertIsInstance(parent.children[0], IntegerLiteral)
         self.assertEqual(parent.children[0].value, 42)
-
-    def test_resolve_values(self):
-        a = Identifier('a')
-        one = IntegerLiteral(1)
-        fortytwo = IntegerLiteral(42)
-        scope = {
-            'a': fortytwo,
-        }
-        el = ExpressionList(children=[a, one])
-        resolve_values(el, scope)
-        self.assertEqual(el.children, [fortytwo, one])
