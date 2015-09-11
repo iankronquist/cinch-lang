@@ -18,7 +18,7 @@ $ pip install -r requirements.txt
 
 When the python implementation is ready, just run:
 ```
-$ ./cinch/cinch file.cinch
+$ ./cinch/cinch [interpret|dump|vm|compile] file.cinch
 ```
 
 To run tests with coverage:
