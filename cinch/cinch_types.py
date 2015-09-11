@@ -105,6 +105,7 @@ class Return(Statement):
 
 
 class Identifier(Expression):
+    count = -1
     pass
 
 
