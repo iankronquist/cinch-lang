@@ -18,8 +18,8 @@ def interpret_statement_list(parent, ast, variable_table):
 
 def interpret_statement(parent, ast, variable_table):
     if isinstance(ast, If):
-        interpret_expression(ast, ast.children[0], variable_table)
-        if is_truthy(ast.children[0], variable_table):
+        ret = interpret_expression(ast, ast.children[0], variable_table)
+        if is_truthy(ret, variable_table):
             interpret_statement_list(ast.children[1], ast.children[1],
                                      variable_table)
     elif isinstance(ast, While):
@@ -32,20 +32,19 @@ def interpret_statement(parent, ast, variable_table):
         return interpret_return_statement(parent, ast, variable_table)
     else:
         assert isinstance(ast, Expression)
-        #print 'is', variable_table
+        print ast
         interpret_expression(parent, ast, variable_table)
 
 
 def interpret_expression(parent, statement, variable_table):
     if isinstance(statement, Operator):
-        #print 'ie', variable_table
         return interpret_binary_expr(parent, statement, variable_table)
     elif isinstance(statement, Identifier):
         return interpret_identifier(parent, statement, variable_table)
     elif isinstance(statement, FunctionCall):
         return interpret_func_call(statement, variable_table)
     elif isinstance(statement, IntegerLiteral):
-        pass
+        return statement
     else:
         print statement
         assert False
@@ -98,17 +97,18 @@ def interpret_func_call(node, variable_table):
     values = node.children[0].children
     names = function.children[0].children
     local = deepcopy(variable_table)
-    for expression, argument in zip(names, values):
+    for argument, expression in zip(names, values):
         value = interpret_expression(None, expression, variable_table)
-        local[argument.value] = expression
-    print local
-    return interpret_statement_list(parent.children[1], parent.children[1], local)
+        local[argument.value] = value
+    return interpret_statement_list(function.children[1], function.children[1], local)
 
 
 def interpret_binary_expr(parent, statement, variable_table):
     # TODO: Implement <, <=, >, >=, !=
-    #print 'ibe', variable_table
-    rvalue = interpret_expression(statement, statement.children[1], variable_table).value
+    print 's', statement
+    rvalue = interpret_expression(statement, statement.children[1], variable_table)
+    print 'rv', rvalue
+    rvalue = rvalue.value
     if statement.value == '=':
         assert isinstance(statement.children[0], Identifier)
         assert isinstance(statement.children[1],
