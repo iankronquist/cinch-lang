@@ -3,7 +3,7 @@ function fib ( a b max ) {
 	while ( b < max ) {
 		tmp = a
 		a = b
-		b = a + b
+		b = b + tmp
 	}
 	return b
 }
