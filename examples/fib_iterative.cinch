@@ -8,4 +8,4 @@ function fib ( a b max ) {
 	return b
 }
 
-fib ( 1 1 10 )
+result = fib ( 1 1 10 )
