@@ -1,8 +1,7 @@
 from unittest import TestCase
 from mock import patch, call
 from cinch.cinch_types import (Identifier, IntegerLiteral, ArgumentList,
-                               Operator, FunctionDef, StatementList, If, While,
-                               Return, ExpressionList)
+                               FunctionDef, StatementList, If, While, Return)
 from cinch.interpreter import (is_truthy, interpret_func_def,
                                interpret_statement, interpret_while,
                                interpret_return_statement,
@@ -20,21 +19,6 @@ class TestInterpreter(TestCase):
 
         negone = IntegerLiteral(-1)
         self.assertEqual(is_truthy(negone, {}), True)
-
-        scope = {
-            'a': 0,
-            'b': 1,
-            'c': -1,
-        }
-        a = Identifier('a')
-        self.assertEqual(is_truthy(a, scope), False)
-
-        b = Identifier('b')
-
-        self.assertEqual(is_truthy(b, scope), True)
-
-        c = Identifier('c')
-        self.assertEqual(is_truthy(c, scope), True)
 
     def test_def_func(self):
         func = FunctionDef('name')
@@ -58,12 +42,25 @@ class TestInterpreter(TestCase):
     @patch('cinch.interpreter.interpret_expression')
     @patch('cinch.interpreter.interpret_statement_list')
     def test_if(self, interpret_statement_list, interpret_expression):
+        interpret_expression.return_value = IntegerLiteral(1)
         args = IntegerLiteral(1)
         body = StatementList()
         fi = If(None, children=[args, body])
         interpret_statement(None, fi, {})
         interpret_expression.assert_called_with(fi, args, {})
         interpret_statement_list.assert_called_with(body, body, {})
+
+    @patch('cinch.interpreter.interpret_expression')
+    @patch('cinch.interpreter.interpret_statement_list')
+    def test_if_not_taken(self, interpret_statement_list,
+                          interpret_expression):
+        interpret_expression.return_value = IntegerLiteral(0)
+        args = IntegerLiteral(0)
+        body = StatementList()
+        fi = If(None, children=[args, body])
+        interpret_statement(None, fi, {})
+        interpret_expression.assert_called_with(fi, args, {})
+        self.assertFalse(interpret_statement_list.called)
 
     @patch('cinch.interpreter.is_truthy')
     @patch('cinch.interpreter.interpret_statement_list')
@@ -122,8 +119,8 @@ class TestInterpreter(TestCase):
         ret = Return(children=[expr])
         sl = StatementList(children=[ret])
         self.assertEqual(sl.children, [ret])
-        interpret_return_statement(sl, ret, {})
-        self.assertEqual(sl.children, [expr])
+        ret = interpret_return_statement(sl, ret, {})
+        self.assertEqual(ret, expr)
 
     @patch('cinch.interpreter.interpret_return_statement')
     def test_return_statement_machine(self, interpret_return_statement):
@@ -145,6 +142,6 @@ class TestInterpreter(TestCase):
         scope = {
             'a': IntegerLiteral(42),
         }
-        interpret_identifier(parent, ident, scope)
-        self.assertIsInstance(parent.children[0], IntegerLiteral)
-        self.assertEqual(parent.children[0].value, 42)
+        integer = interpret_identifier(parent, ident, scope)
+        self.assertIsInstance(integer, IntegerLiteral)
+        self.assertEqual(integer.value, 42)
