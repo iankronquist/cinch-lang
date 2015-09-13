@@ -11,9 +11,10 @@ def interpret(ast):
 
 
 def interpret_statement_list(parent, ast, variable_table):
+    ret = None
     for statement in ast.children:
-        #print 'isl', variable_table
-        interpret_statement(parent, statement, variable_table)
+        ret = interpret_statement(parent, statement, variable_table)
+    return ret
 
 
 def interpret_statement(parent, ast, variable_table):
@@ -32,7 +33,6 @@ def interpret_statement(parent, ast, variable_table):
         return interpret_return_statement(parent, ast, variable_table)
     else:
         assert isinstance(ast, Expression)
-        print ast
         interpret_expression(parent, ast, variable_table)
 
 
@@ -58,7 +58,7 @@ def interpret_identifier(parent, statement, variable_table):
 
 def interpret_return_statement(parent, statement, variable_table):
     return interpret_expression(statement, statement.children[0],
-                         variable_table)
+                                variable_table)
 
 
 def is_truthy(node, variable_table):
@@ -74,10 +74,12 @@ def interpret_func_def(statement, variable_table):
 
 
 def interpret_while(parent, statement, variable_table):
-    value = interpret_expression(statement, statement.children[0], variable_table)
-    while is_truthy(value):
-        interpret_statement_list(parent, statement.children[1], {})
-        interpret_expression(statement, statement.children[0], variable_table)
+    value = interpret_expression(statement, statement.children[0],
+                                 variable_table)
+    while is_truthy(value, variable_table):
+        interpret_statement_list(parent, statement.children[1], variable_table)
+        value = interpret_expression(statement, statement.children[0],
+                                     variable_table)
 
 
 def get_value(node, variable_table):
@@ -100,32 +102,36 @@ def interpret_func_call(node, variable_table):
     for argument, expression in zip(names, values):
         value = interpret_expression(None, expression, variable_table)
         local[argument.value] = value
-    return interpret_statement_list(function.children[1], function.children[1], local)
+    return interpret_statement_list(function.children[1], function.children[1],
+                                    local)
 
 
 def interpret_binary_expr(parent, statement, variable_table):
     # TODO: Implement <, <=, >, >=, !=
-    print 's', statement
-    rvalue = interpret_expression(statement, statement.children[1], variable_table)
-    print 'rv', rvalue
-    rvalue = rvalue.value
+    rvalue = interpret_expression(statement, statement.children[1],
+                                  variable_table)
     if statement.value == '=':
         assert isinstance(statement.children[0], Identifier)
-        assert isinstance(statement.children[1],
-                          (Identifier, IntegerLiteral, Operator))
-        lvalue = statement.children[0].value
-        variable_table[lvalue] = rvalue
+        assert isinstance(statement.children[1], Expression)
+        lvalue = statement.children[0]
+        variable_table[lvalue.value] = rvalue
         return None
     elif statement.value == '-':
-        lvalue = interpret_expression(statement, statement.children[0], variable_table).value
+        rvalue = rvalue.value
+        lvalue = interpret_expression(statement, statement.children[0],
+                                      variable_table).value
         result = IntegerLiteral(lvalue-rvalue)
         return result
     elif statement.value == '+':
-        lvalue = interpret_expression(statement, statement.children[0], variable_table).value
+        rvalue = rvalue.value
+        lvalue = interpret_expression(statement, statement.children[0],
+                                      variable_table).value
         result = IntegerLiteral(lvalue+rvalue)
         return result
     elif statement.value == '<':
-        lvalue = interpret_expression(statement, statement.children[0], variable_table).value
+        rvalue = rvalue.value
+        lvalue = interpret_expression(statement, statement.children[0],
+                                      variable_table).value
         if lvalue < rvalue:
             result = IntegerLiteral(1)
         else:
@@ -134,4 +140,3 @@ def interpret_binary_expr(parent, statement, variable_table):
     else:
         print statement
         assert False
-
