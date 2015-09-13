@@ -11,18 +11,18 @@ def interpret(ast):
 
 
 def interpret_statement_list(parent, ast, variable_table):
-    ret = None
     for statement in ast.children:
         ret = interpret_statement(parent, statement, variable_table)
-    return ret
+        if ret is not None:
+            return ret
 
 
 def interpret_statement(parent, ast, variable_table):
     if isinstance(ast, If):
         ret = interpret_expression(ast, ast.children[0], variable_table)
         if is_truthy(ret, variable_table):
-            interpret_statement_list(ast.children[1], ast.children[1],
-                                     variable_table)
+            return interpret_statement_list(ast.children[1], ast.children[1],
+                                            variable_table)
     elif isinstance(ast, While):
         interpret_while(parent, ast, variable_table)
     elif isinstance(ast, FunctionCall):
@@ -57,8 +57,9 @@ def interpret_identifier(parent, statement, variable_table):
 
 
 def interpret_return_statement(parent, statement, variable_table):
-    return interpret_expression(statement, statement.children[0],
-                                variable_table)
+    v = interpret_expression(statement, statement.children[0],
+                             variable_table)
+    return IntegerLiteral(v.value)
 
 
 def is_truthy(node, variable_table):
@@ -126,8 +127,7 @@ def interpret_binary_expr(parent, statement, variable_table):
         rvalue = rvalue.value
         lvalue = interpret_expression(statement, statement.children[0],
                                       variable_table).value
-        result = IntegerLiteral(lvalue+rvalue)
-        return result
+        return IntegerLiteral(lvalue+rvalue)
     elif statement.value == '<':
         rvalue = rvalue.value
         lvalue = interpret_expression(statement, statement.children[0],
