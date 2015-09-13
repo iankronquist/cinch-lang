@@ -120,7 +120,7 @@ class TestInterpreter(TestCase):
         sl = StatementList(children=[ret])
         self.assertEqual(sl.children, [ret])
         ret = interpret_return_statement(sl, ret, {})
-        self.assertEqual(ret, expr)
+        self.assertEqual(ret.value, expr.value)
 
     @patch('cinch.interpreter.interpret_return_statement')
     def test_return_statement_machine(self, interpret_return_statement):
@@ -131,6 +131,7 @@ class TestInterpreter(TestCase):
     @patch('cinch.interpreter.interpret_statement')
     def test_interpret_statement_list(self, interpret_statement):
         sl = StatementList(children=[1, 2, 3])
+        interpret_statement.return_value = None
         interpret_statement_list(None, sl, {})
         interpret_statement.assert_has_calls([call(None, 1, {}),
                                               call(None, 2, {}),
