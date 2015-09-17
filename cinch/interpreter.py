@@ -57,9 +57,8 @@ def interpret_identifier(parent, statement, variable_table):
 
 
 def interpret_return_statement(parent, statement, variable_table):
-    v = interpret_expression(statement, statement.children[0],
-                             variable_table)
-    return IntegerLiteral(v.value)
+    return interpret_expression(statement, statement.children[0],
+                                variable_table)
 
 
 def is_truthy(node, variable_table):
