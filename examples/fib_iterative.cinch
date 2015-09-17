@@ -1,4 +1,4 @@
-
+# comment
 function fib ( a b max ) {
 	while ( b < max ) {
 		tmp = a
