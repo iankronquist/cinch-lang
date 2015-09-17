@@ -10,6 +10,8 @@ def lex(source):
     """Lex the source code. Split on spaces, strip newlines, and filter out
     empty strings"""
     # Strip comments from source code.
-    source = re.sub('#.*$', '', source)
+    print source
+    source = re.sub('#.*', '', source)
+    print source
     return filter(lambda s: s != '',
                   re.split('\s', source))
