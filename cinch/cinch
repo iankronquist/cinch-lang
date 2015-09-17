@@ -3,6 +3,7 @@ import sys
 from lexer import lex
 from parser import parse
 from interpreter import interpret
+from compiler import compile_to_ir
 
 
 USAGE = """{name} [interpret|dump|vm|compile] file"""
@@ -24,6 +25,8 @@ def main():
         raise NotImplementedError
     elif flag == 'compile':
         raise NotImplementedError
+    elif flag == 'compile-ir':
+         compile_to_ir(ast)
     else:
         print USAGE.format(name=sys.argv[0])
 
