@@ -1,6 +1,6 @@
 from enum import Enum
 from cinch_types import (If, While, FunctionCall, FunctionDef, Operator,
-                         Identifier)
+                         Identifier, IntegerLiteral, Return, Expression)
 
 # instructions
 #
@@ -15,6 +15,7 @@ from cinch_types import (If, While, FunctionCall, FunctionDef, Operator,
 # label:
 Instruction = Enum('Instruction', 'add sub gt lt eq geq leq jmp')
 
+
 class Code3Address(object):
 
     def __init__(self, instr_type, left=None, right=None, result=None):
@@ -23,21 +24,25 @@ class Code3Address(object):
         self.left = left
         self.right = right
 
+
 class Variable(object):
     count = 0
 
     def __init__(self):
         Variable.count += 1
 
+
 def compile(ast):
     compile_to_ir(ast)
+
 
 class InstructionBlock(list):
     def __init__(self, label):
         self.label = label
 
     def __str__(self):
-        return '{}: {}'.format(self.label, super(InstructionBlock, self).__str__())
+        return '{}: {}'.format(self.label,
+                               super(InstructionBlock, self).__str__())
 
 
 def compile_to_ir(ast):
@@ -52,6 +57,7 @@ def compile_if(ast):
     block = compile_statement_list(ast.children[1])
     return [first, block]
 
+
 def compile_condition(ast):
     if isinstance(ast, Operator):
         symbol_to_mnemonic = {
@@ -64,14 +70,17 @@ def compile_condition(ast):
         variable_l, left = compile_expression(ast.children[0])
         variable_r, right = compile_expression(ast.children[1])
         instr_type = symbol_to_mnemonic[ast.value]
-        comparison = Code3Address(instr_type, left=variable_l, right=variable_r)
+        comparison = Code3Address(instr_type, left=variable_l,
+                                  right=variable_r)
         jump = Code3Address(Instruction.jmp, left=comparison.result)
         return [left, right, comparison, jump]
     elif isinstance(ast, IntegerLiteral):
-        return [Code3Address(Instruction.jmp, left=ast.value, right=Variable())]
+        return [Code3Address(Instruction.jmp, left=ast.value,
+                right=Variable())]
     elif isinstance(ast, Identifier):
         assert ast.count != -1
-        return [Code3Address(Instruction.jmp, left=ast.count, right=Variable())]
+        return [Code3Address(Instruction.jmp, left=ast.count,
+                             right=Variable())]
     else:
         assert False
 
@@ -86,7 +95,6 @@ def compile_while(ast):
 def compile_statement_list(ast):
     statements = []
     for statement in ast.children:
-        #print 'isl', variable_table
         statements.append(compile_statement(statement))
     return statements
 
@@ -104,12 +112,11 @@ def compile_statement(ast):
         return compile_return_statement(ast)
     else:
         assert isinstance(ast, Expression)
-        #print 'is', variable_table
         return compile_expression(ast)
+
 
 def compile_expression(ast):
     if isinstance(ast, Operator):
-        #print 'ie', variable_table
         return compile_binary_expr(ast)
     elif isinstance(ast, Identifier):
         return compile_identifier(ast)
@@ -120,13 +127,33 @@ def compile_expression(ast):
     else:
         assert 0
 
+
 def compile_func_call(ast):
     function = ast.value
     return Code3Address(Instruction.jmp, left=function)
+
 
 def compile_func_def(ast):
     body = compile_statement_list(ast.children[1])
     return InstructionBlock(ast.value).extend(body)
 
+
 def compile_identifier(ast):
     return []
+
+
+def compile_return_statement(ast):
+    return []
+
+
+def compile_binary_expr(ast):
+    symbol_to_mnemonic = {
+        '+': Instruction.add,
+        '-': Instruction.sub,
+    }
+    variable_l, left = compile_expression(ast.children[0])
+    variable_r, right = compile_expression(ast.children[1])
+    instr_type = symbol_to_mnemonic[ast.value]
+    expression = Code3Address(instr_type, left=variable_l,
+                              right=variable_r)
+    return [left, right, expression]
