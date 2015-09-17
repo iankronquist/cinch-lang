@@ -12,8 +12,14 @@ USAGE = """{name} [interpret|dump|vm|compile] file"""
 def main():
     flag = sys.argv[1]
     file_name = sys.argv[2]
-    with open(file_name, 'r') as f:
-        source = f.read()
+    try:
+        with open(file_name, 'r') as f:
+            source = f.read()
+    except IOError as e:
+        sys.stderr.write(
+            "can't open file {}: {}\n".format(
+                file_name, e.strerror))
+        sys.exit(e.errno)
     tokens = lex(source)
     ast = parse(tokens)
 
