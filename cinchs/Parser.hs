@@ -65,7 +65,7 @@ parseReturnStatement ("return":rest) = do
 parseExpression :: [String] -> (Ast, [String])
 parseExpression tokens = do
   let (first, rest) = parseExpressionHelper tokens
-  if (length rest > 0) && (head rest `elem` operators) then parseBinaryExpression first rest else (first, rest)
+  if not (null rest) && (head rest `elem` operators) then parseBinaryExpression first rest else (first, rest)
 
 parseExpressionHelper :: [String] -> (Ast, [String])
 parseExpressionHelper (f:"(":tokens) = parseFuncCall (f:"(":tokens)
@@ -74,13 +74,13 @@ parseExpressionHelper tokens
   | otherwise = parseIdentifier tokens
 
 parseIdentifierList :: [String] -> ([Ast], [String])
-parseIdentifierList tokens = parseIdentifierListHelper [] tokens
+parseIdentifierList = parseIdentifierListHelper []
 
 parseIdentifierListHelper :: [Ast] -> [String] -> ([Ast], [String])
 parseIdentifierListHelper asts (")":rest) = (reverse asts, rest)
 parseIdentifierListHelper asts tokens = do
   let (ast, rest) = parseIdentifier tokens
-  (parseIdentifierListHelper (ast:asts) rest)
+  parseIdentifierListHelper (ast:asts) rest
 
 parseFuncCall :: [String] ->  (Ast, [String])
 parseFuncCall tokens = do
@@ -92,7 +92,7 @@ parseNumber :: [String] ->  (Ast, [String])
 parseNumber tokens = (Ast { typ=IntegerLiteral, name=head tokens, children=[] }, tail tokens)
 
 parseIdentifier :: [String] -> (Ast, [String])
-parseIdentifier tokens = (Ast { typ=Identifier, name=tokens !! 0, children=[] }, tail tokens)
+parseIdentifier tokens = (Ast { typ=Identifier, name=head tokens, children=[] }, tail tokens)
 
 parseBinaryExpression :: Ast -> [String] -> (Ast, [String])
 parseBinaryExpression left tokens = do
