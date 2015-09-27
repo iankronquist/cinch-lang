@@ -48,7 +48,7 @@ parseWhileLoop :: [String] -> (Ast, [String])
 parseWhileLoop ("while":"(":tks) = do
   let (cond, bodytks) = parseExpression tks
   let (body, rest) = parseBlock $ tail bodytks
-  (Ast { typ=If, name="", children=[cond, body] }, rest)
+  (Ast { typ=While, name="", children=[cond, body] }, rest)
 
 parseFuncDef :: [String] -> (Ast, [String])
 parseFuncDef ("function":tokens) = do
