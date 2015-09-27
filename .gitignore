@@ -1,5 +1,11 @@
 __pycache__
 *.pyc
 *.swp
+
+# Python code coverage artifacts
 coverage/*
 .coverage
+
+# Cabal sandbox artifacts
+cabal.sandbox.config
+.cabal-sandbox/
