@@ -9,99 +9,99 @@ import CinchTypes
 
 parse :: [String] -> Ast
 parse tokens = do
-  let (ast, _) = parse_statement_list tokens
+  let (ast, _) = parseStatementList tokens
   ast
 
 
-parse_statement_list :: [String] -> (Ast, [String])
-parse_statement_list tokens = do
-  let (sl, others) = parse_statement_list_helper [] tokens
+parseStatementList :: [String] -> (Ast, [String])
+parseStatementList tokens = do
+  let (sl, others) = parseStatementListHelper [] tokens
   (Ast { typ=StatementList, name="", children=sl }, others)
 
-parse_statement_list_helper :: [Ast] -> [String] -> ([Ast], [String])
-parse_statement_list_helper asts [] = (asts, [])
-parse_statement_list_helper asts tokens = do
-  let (ast, rest) = parse_statement tokens
-  parse_statement_list_helper (asts++[ast]) rest
+parseStatementListHelper :: [Ast] -> [String] -> ([Ast], [String])
+parseStatementListHelper asts [] = (asts, [])
+parseStatementListHelper asts tokens = do
+  let (ast, rest) = parseStatement tokens
+  parseStatementListHelper (asts++[ast]) rest
 
 
-parse_statement :: [String] -> (Ast, [String])
-parse_statement ("if":tokens) = parse_if_statement tokens
-parse_statement ("while":tokens) = parse_while_loop tokens
-parse_statement ("function":tokens) = parse_while_loop tokens
-parse_statement ("return":tokens) = parse_while_loop tokens
-parse_statement tokens = parse_expression tokens
+parseStatement :: [String] -> (Ast, [String])
+parseStatement ("if":tokens) = parseIfStatement tokens
+parseStatement ("while":tokens) = parseWhileLoop tokens
+parseStatement ("function":tokens) = parseWhileLoop tokens
+parseStatement ("return":tokens) = parseWhileLoop tokens
+parseStatement tokens = parseExpression tokens
 
-parse_assignment :: [String]  -> (Ast, [String])
-parse_assignment tokens = do
-  let (name, rest) = parse_identifier tokens
-  let (expr, others) = parse_expression $ tail rest
+parseAssignment :: [String]  -> (Ast, [String])
+parseAssignment tokens = do
+  let (name, rest) = parseIdentifier tokens
+  let (expr, others) = parseExpression $ tail rest
   (Ast { typ=AssignmentStatement, name="", children=[name, expr] }, others)
 
-parse_if_statement :: [String] -> (Ast, [String])
-parse_if_statement ("if":"(":tks) = do
-  let (cond, bodytks) = parse_expression tks
-  let (body, rest) = parse_block $ tail bodytks
+parseIfStatement :: [String] -> (Ast, [String])
+parseIfStatement ("if":"(":tks) = do
+  let (cond, bodytks) = parseExpression tks
+  let (body, rest) = parseBlock $ tail bodytks
   (Ast { typ=If, name="", children=[cond, body] }, rest)
 
-parse_while_loop :: [String] -> (Ast, [String])
-parse_while_loop ("while":"(":tks) = do
-  let (cond, bodytks) = parse_expression tks
-  let (body, rest) = parse_block $ tail bodytks
+parseWhileLoop :: [String] -> (Ast, [String])
+parseWhileLoop ("while":"(":tks) = do
+  let (cond, bodytks) = parseExpression tks
+  let (body, rest) = parseBlock $ tail bodytks
   (Ast { typ=If, name="", children=[cond, body] }, rest)
 
-parse_func_def :: [String] -> (Ast, [String])
-parse_func_def ("function":tokens) = do
+parseFuncDef :: [String] -> (Ast, [String])
+parseFuncDef ("function":tokens) = do
   let name = head tokens
-  let (argument_names, newtoks) = parse_identifier_list $ tail $ tail tokens
-  let (body, newertoks) = parse_block $ tail newtoks
-  (Ast { typ=FunctionDef, name=name, children=argument_names++[body] }, newertoks)
+  let (argumentNames, newtoks) = parseIdentifierList $ tail $ tail tokens
+  let (body, newertoks) = parseBlock $ tail newtoks
+  (Ast { typ=FunctionDef, name=name, children=argumentNames++[body] }, newertoks)
 
-parse_return_statement :: [String] -> (Ast, [String])
-parse_return_statement ("return":rest) = do
-  let (expr, others) = parse_expression rest
+parseReturnStatement :: [String] -> (Ast, [String])
+parseReturnStatement ("return":rest) = do
+  let (expr, others) = parseExpression rest
   (Ast { typ=Return, name="", children=[expr] }, others)
 
-parse_expression :: [String] -> (Ast, [String])
-parse_expression tokens = do
-  let (first, rest) = parse_expression_helper tokens
-  if (length rest > 0) && (head rest `elem` operators) then parse_binary_expression first rest else (first, rest)
+parseExpression :: [String] -> (Ast, [String])
+parseExpression tokens = do
+  let (first, rest) = parseExpressionHelper tokens
+  if (length rest > 0) && (head rest `elem` operators) then parseBinaryExpression first rest else (first, rest)
 
-parse_expression_helper :: [String] -> (Ast, [String])
-parse_expression_helper (f:"(":tokens) = parse_func_call (f:"(":tokens)
-parse_expression_helper tokens
-  | all isDigit $ head tokens = parse_number tokens
-  | otherwise = parse_identifier tokens
+parseExpressionHelper :: [String] -> (Ast, [String])
+parseExpressionHelper (f:"(":tokens) = parseFuncCall (f:"(":tokens)
+parseExpressionHelper tokens
+  | all isDigit $ head tokens = parseNumber tokens
+  | otherwise = parseIdentifier tokens
 
-parse_identifier_list :: [String] -> ([Ast], [String])
-parse_identifier_list tokens = parse_identifier_list_helper [] tokens
+parseIdentifierList :: [String] -> ([Ast], [String])
+parseIdentifierList tokens = parseIdentifierListHelper [] tokens
 
-parse_identifier_list_helper :: [Ast] -> [String] -> ([Ast], [String])
-parse_identifier_list_helper asts (")":rest) = (reverse asts, rest)
-parse_identifier_list_helper asts tokens = do
-  let (ast, rest) = parse_identifier tokens
-  (parse_identifier_list_helper (ast:asts) rest)
+parseIdentifierListHelper :: [Ast] -> [String] -> ([Ast], [String])
+parseIdentifierListHelper asts (")":rest) = (reverse asts, rest)
+parseIdentifierListHelper asts tokens = do
+  let (ast, rest) = parseIdentifier tokens
+  (parseIdentifierListHelper (ast:asts) rest)
 
-parse_func_call :: [String] ->  (Ast, [String])
-parse_func_call tokens = do
-  let (name, rest) = parse_identifier tokens
-  let (args, others) = parse_identifier_list $ tail rest
+parseFuncCall :: [String] ->  (Ast, [String])
+parseFuncCall tokens = do
+  let (name, rest) = parseIdentifier tokens
+  let (args, others) = parseIdentifierList $ tail rest
   (Ast { typ=FunctionCall, name="", children=name:args }, tail others)
 
-parse_number :: [String] ->  (Ast, [String])
-parse_number tokens = (Ast { typ=IntegerLiteral, name=head tokens, children=[] }, tail tokens)
+parseNumber :: [String] ->  (Ast, [String])
+parseNumber tokens = (Ast { typ=IntegerLiteral, name=head tokens, children=[] }, tail tokens)
 
-parse_identifier :: [String] -> (Ast, [String])
-parse_identifier tokens = (Ast { typ=Identifier, name=tokens !! 0, children=[] }, tail tokens)
+parseIdentifier :: [String] -> (Ast, [String])
+parseIdentifier tokens = (Ast { typ=Identifier, name=tokens !! 0, children=[] }, tail tokens)
 
-parse_binary_expression :: Ast -> [String] -> (Ast, [String])
-parse_binary_expression left tokens = do
+parseBinaryExpression :: Ast -> [String] -> (Ast, [String])
+parseBinaryExpression left tokens = do
   let foo = tail []
   let operator = head tokens
-  let (right, rest) = parse_expression $ tail tokens
+  let (right, rest) = parseExpression $ tail tokens
   (Ast { typ=BinaryExpression, name=operator, children=[right] }, rest)
 
-parse_block :: [String] -> (Ast, [String])
-parse_block ("{":body) = do
-  let (ast, rest) = parse_statement_list body
+parseBlock :: [String] -> (Ast, [String])
+parseBlock ("{":body) = do
+  let (ast, rest) = parseStatementList body
   (ast, tail rest)
