@@ -3,14 +3,15 @@ module Parser where
 import Data.Char
 import CinchTypes
 
--- TODO: Use the State monad
 -- TODO: Write Parser monad
 -- FIXME: Check that tokens like "(" and "{" are what we think and don't just 
 -- ignore them
 
-parse :: [String] -> (Ast, [String])
+parse :: [String] -> Ast
 parse tokens = do
-  parse_statement_list tokens
+  let (ast, _) = parse_statement_list tokens
+  ast
+
 
 parse_statement_list :: [String] -> (Ast, [String])
 parse_statement_list tokens = do
