@@ -7,101 +7,116 @@ import CinchTypes
 -- FIXME: Check that tokens like "(" and "{" are what we think and don't just 
 -- ignore them
 
-parse :: [String] -> Ast
-parse tokens = do
-  let (ast, _) = parseStatementList tokens
-  ast
+parse :: [String] -> Maybe Ast
+parse tokens = case (parseStatementList tokens) of
+  Just (ast, _) -> Just ast
+
+parseStatementList :: [String] -> Maybe (Ast, [String])
+parseStatementList tokens = case parseStatementListHelper [] tokens of
+  Nothing -> Nothing
+  Just (sl, others) -> Just (Ast { typ=StatementList, name="", children=sl }, others)
+
+parseStatementListHelper :: [Ast] -> [String] -> Maybe ([Ast], [String])
+parseStatementListHelper asts [] = Just (asts, [])
+parseStatementListHelper asts tokens = case parseStatement tokens of
+  Nothing -> Nothing
+  Just (ast, rest) -> parseStatementListHelper (asts++[ast]) rest
 
 
-parseStatementList :: [String] -> (Ast, [String])
-parseStatementList tokens = do
-  let (sl, others) = parseStatementListHelper [] tokens
-  (Ast { typ=StatementList, name="", children=sl }, others)
-
-parseStatementListHelper :: [Ast] -> [String] -> ([Ast], [String])
-parseStatementListHelper asts [] = (asts, [])
-parseStatementListHelper asts tokens = do
-  let (ast, rest) = parseStatement tokens
-  parseStatementListHelper (asts++[ast]) rest
-
-
-parseStatement :: [String] -> (Ast, [String])
-parseStatement ("if":tokens) = parseIfStatement tokens
-parseStatement ("while":tokens) = parseWhileLoop tokens
-parseStatement ("function":tokens) = parseWhileLoop tokens
+parseStatement :: [String] -> Maybe (Ast, [String])
+parseStatement ("if":"(":tokens) = parseIfStatement tokens
+parseStatement ("while":"(":tokens) = parseWhileLoop tokens
+parseStatement ("function":"(":tokens) = parseWhileLoop tokens
 parseStatement ("return":tokens) = parseWhileLoop tokens
 parseStatement tokens = parseExpression tokens
 
-parseAssignment :: [String]  -> (Ast, [String])
-parseAssignment tokens = do
-  let (name, rest) = parseIdentifier tokens
-  let (expr, others) = parseExpression $ tail rest
-  (Ast { typ=AssignmentStatement, name="", children=[name, expr] }, others)
+parseAssignment :: [String]  -> Maybe (Ast, [String])
+parseAssignment tokens = case parseIdentifier tokens of
+  Nothing -> Nothing
+  Just (name, ("=":rest)) -> case parseExpression rest of
+    Nothing -> Nothing
+    Just (expr, others) -> Just (Ast { typ=AssignmentStatement, name="", children=[name, expr] }, others)
+  otherwise -> Nothing
 
-parseIfStatement :: [String] -> (Ast, [String])
-parseIfStatement ("if":"(":tks) = do
-  let (cond, bodytks) = parseExpression tks
-  let (body, rest) = parseBlock $ tail bodytks
-  (Ast { typ=If, name="", children=[cond, body] }, rest)
+parseIfStatement :: [String] -> Maybe (Ast, [String])
+parseIfStatement tks = case parseExpression tks of
+  Nothing -> Nothing
+  Just (cond, ("{":body)) -> case parseBlock body of
+    Nothing -> Nothing
+    Just (body, ("}":rest)) -> Just (Ast { typ=If, name="", children=[cond, body] }, rest)
+    otherwise -> Nothing
 
-parseWhileLoop :: [String] -> (Ast, [String])
-parseWhileLoop ("while":"(":tks) = do
-  let (cond, bodytks) = parseExpression tks
-  let (body, rest) = parseBlock $ tail bodytks
-  (Ast { typ=While, name="", children=[cond, body] }, rest)
+parseWhileLoop :: [String] -> Maybe (Ast, [String])
+parseWhileLoop tks = case parseExpression tks of
+  Nothing -> Nothing
+  Just (cond, ("{":body)) -> case parseBlock body of
+    Nothing -> Nothing
+    Just (body, ("}":rest)) -> Just (Ast { typ=While, name="", children=[cond, body] }, rest)
+    otherwise -> Nothing
 
-parseFuncDef :: [String] -> (Ast, [String])
-parseFuncDef ("function":tokens) = do
-  let name = head tokens
-  let (argumentNames, newtoks) = parseIdentifierList $ tail $ tail tokens
-  let (body, newertoks) = parseBlock $ tail newtoks
-  (Ast { typ=FunctionDef, name=name, children=argumentNames++[body] }, newertoks)
+parseFuncDef :: [String] -> Maybe (Ast, [String])
+parseFuncDef ("function":name:(")":"{":tokens)) = case (parseIdentifierList tokens) of
+  Nothing -> Nothing
+  Just (argumentNames, ("}":newtoks)) -> case (parseBlock newtoks) of
+    Nothing -> Nothing
+    Just (body, newertoks) -> Just (Ast { typ=FunctionDef, name=name, children=argumentNames++[body] }, newertoks)
+  otherwise -> Nothing
+parseFuncDef otherwise = Nothing
 
-parseReturnStatement :: [String] -> (Ast, [String])
-parseReturnStatement ("return":rest) = do
-  let (expr, others) = parseExpression rest
-  (Ast { typ=Return, name="", children=[expr] }, others)
+parseReturnStatement :: [String] -> Maybe (Ast, [String])
+parseReturnStatement ("return":rest) = case (parseExpression rest) of
+  Nothing -> Nothing
+  Just (expr, others) -> Just (Ast { typ=Return, name="", children=[expr] }, others)
 
-parseExpression :: [String] -> (Ast, [String])
-parseExpression tokens = do
-  let (first, rest) = parseExpressionHelper tokens
-  if not (null rest) && (head rest `elem` operators) then parseBinaryExpression first rest else (first, rest)
+parseExpression :: [String] -> Maybe (Ast, [String])
+parseExpression tokens = case (parseExpressionHelper tokens) of
+  Nothing -> Nothing
+  Just (first, (op:rest)) -> if (op `elem` operators) then
+      parseBinaryExpression first (op:rest)
+    else
+      Just (first, rest)
+  Just (first, []) -> Just (first, [])
+  otherwise -> Nothing
 
-parseExpressionHelper :: [String] -> (Ast, [String])
+parseExpressionHelper :: [String] -> Maybe (Ast, [String])
 parseExpressionHelper (f:"(":tokens) = parseFuncCall (f:"(":tokens)
 parseExpressionHelper tokens
   | all isDigit $ head tokens = parseNumber tokens
   | otherwise = parseIdentifier tokens
 
-parseIdentifierList :: [String] -> ([Ast], [String])
+parseIdentifierList :: [String] -> Maybe ([Ast], [String])
 parseIdentifierList = parseIdentifierListHelper []
 
-parseIdentifierListHelper :: [Ast] -> [String] -> ([Ast], [String])
-parseIdentifierListHelper asts (")":rest) = (reverse asts, rest)
-parseIdentifierListHelper asts tokens = do
-  let (ast, rest) = parseIdentifier tokens
-  parseIdentifierListHelper (ast:asts) rest
+parseIdentifierListHelper :: [Ast] -> [String] -> Maybe ([Ast], [String])
+parseIdentifierListHelper asts (")":rest) = Just (reverse asts, rest)
+parseIdentifierListHelper asts tokens = case (parseIdentifier tokens) of
+  Nothing -> Nothing
+  Just (ast, rest) -> parseIdentifierListHelper (ast:asts) rest
 
-parseFuncCall :: [String] ->  (Ast, [String])
-parseFuncCall tokens = do
-  let (name, rest) = parseIdentifier tokens
-  let (args, others) = parseIdentifierList $ tail rest
-  (Ast { typ=FunctionCall, name="", children=name:args }, tail others)
+parseFuncCall :: [String] ->  Maybe (Ast, [String])
+parseFuncCall tokens = case (parseIdentifier tokens) of
+  Nothing -> Nothing
+  Just (name, rest) -> case (parseIdentifierList $ tail rest) of
+    Nothing -> Nothing
+    Just (args, others) -> Just (
+      Ast { typ=FunctionCall, name="", children=name:args },
+      tail others)
 
-parseNumber :: [String] ->  (Ast, [String])
-parseNumber tokens = (Ast { typ=IntegerLiteral, name=head tokens, children=[] }, tail tokens)
+parseNumber :: [String] ->  Maybe (Ast, [String])
+parseNumber tokens = Just (Ast { typ=IntegerLiteral, name=head tokens, children=[] }, tail tokens)
 
-parseIdentifier :: [String] -> (Ast, [String])
-parseIdentifier tokens = (Ast { typ=Identifier, name=head tokens, children=[] }, tail tokens)
+parseIdentifier :: [String] -> Maybe (Ast, [String])
+parseIdentifier tokens = Just (Ast { typ=Identifier, name=head tokens, children=[] }, tail tokens)
 
-parseBinaryExpression :: Ast -> [String] -> (Ast, [String])
-parseBinaryExpression left tokens = do
-  let foo = tail []
-  let operator = head tokens
-  let (right, rest) = parseExpression $ tail tokens
-  (Ast { typ=BinaryExpression, name=operator, children=[right] }, rest)
+parseBinaryExpression :: Ast -> [String] -> Maybe (Ast, [String])
+parseBinaryExpression left (operator:tokens) = do
+  case (parseExpression tokens) of
+    Nothing -> Nothing
+    Just (right, rest) -> Just (Ast { typ=BinaryExpression, name=operator, children=[right] }, rest)
 
-parseBlock :: [String] -> (Ast, [String])
+parseBlock :: [String] -> Maybe (Ast, [String])
 parseBlock ("{":body) = do
-  let (ast, rest) = parseStatementList body
-  (ast, tail rest)
+  let sl = parseStatementList body
+  case sl of
+    Nothing -> Nothing
+    Just (ast, rest) -> Just (ast, tail rest)
