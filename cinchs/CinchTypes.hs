@@ -14,6 +14,7 @@ data Tok  = Statement
           | Return
           | Identifier
           | StatementList
+          | ExpressionList
           deriving(Show, Eq)
 
 -- FIXME: use Data.Tree
