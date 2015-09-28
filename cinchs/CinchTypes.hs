@@ -24,4 +24,4 @@ data Ast =  Ast {
     children :: [Ast] 
 } deriving (Show)
 
-operators = ["+", "-"]
+operators = ["+", "-", "<"]
